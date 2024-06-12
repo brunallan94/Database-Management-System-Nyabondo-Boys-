@@ -16,4 +16,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # If you want to run main directly, you can uncomment the following line
+    # main()
+    pass
