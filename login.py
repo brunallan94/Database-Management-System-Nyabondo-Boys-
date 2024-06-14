@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
 from db_connection import create_connection
-from main import main as open_main_application
 import mysql.connector
 
 
@@ -24,7 +23,7 @@ def authenticate(username, password):
         conn.close()
 
 
-def login():
+def login(open_main_application):
     username = username_entry.get()
     password = password_entry.get()
     if authenticate(username, password):
@@ -35,7 +34,7 @@ def login():
         messagebox.showerror("Error", "Invalid username or password")
 
 
-def create_login_window():
+def create_login_window(open_main_application):
     global root, username_entry, password_entry
 
     root = tk.Tk()
@@ -62,11 +61,7 @@ def create_login_window():
     password_entry.grid(row=2, column=1, pady=10)
 
     login_button = tk.Button(
-        frame, text="Login", command=login, bg='#FF3399', fg='#FFFFFF', font=('Arial', 10), pady=8)
+        frame, text="Login", command=lambda: login(open_main_application), bg='#FF3399', fg='#FFFFFF', font=('Arial', 10), pady=8)
     login_button.grid(row=3, columnspan=3)
 
     root.mainloop()
-
-
-if __name__ == "__main__":
-    create_login_window()
