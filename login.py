@@ -12,12 +12,12 @@ def authenticate(username, password):
             "SELECT * FROM users WHERE username = %s AND password = %s", (username, password))
         result = cursor.fetchone()
         if result:
-            return True
+            return True, username  # Return username if authentication is successful
         else:
-            return False
+            return False, None
     except mysql.connector.Error as err:
         messagebox.showerror("Error", f"Error: {err}")
-        return False
+        return False, None
     finally:
         cursor.close()
         conn.close()
@@ -26,10 +26,12 @@ def authenticate(username, password):
 def login(open_main_application):
     username = username_entry.get()
     password = password_entry.get()
-    if authenticate(username, password):
+    success, logged_in_user = authenticate(username, password)
+    if success:
         messagebox.showinfo("Success", "Login successful")
         root.destroy()  # Close the login window
-        open_main_application()  # Open the main application window
+        # Open the main application window with the logged_in_user
+        open_main_application(logged_in_user)
     else:
         messagebox.showerror("Error", "Invalid username or password")
 

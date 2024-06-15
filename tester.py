@@ -1,12 +1,13 @@
-from ui import create_student_ui, create_search_student_ui, create_download_and_upload_ui
+from ui import create_student_ui, create_search_student_ui, create_download_and_upload_ui, create_payment_ui
 import tkinter as tk
+from tkinter import ttk
 
 
 def open_main_application(logged_in_user):
     root = tk.Tk()
     root.title('Student Management System')
 
-    tab_control = tk.ttk.Notebook(root)
+    tab_control = ttk.Notebook(root)
 
     add_student_tab = tk.Frame(tab_control)
     payment_tab = tk.Frame(tab_control)
@@ -21,8 +22,7 @@ def open_main_application(logged_in_user):
     tab_control.pack(expand=1, fill='both')
 
     create_student_ui(add_student_tab)
-    # Uncomment and define create_payment_ui if you need it
-    # create_payment_ui(payment_tab)
+    create_payment_ui(payment_tab)
     create_search_student_ui(search_student_tab)
     create_download_and_upload_ui(download_and_upload_tab, logged_in_user)
 

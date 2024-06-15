@@ -26,7 +26,7 @@ def search_students(name):
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "SELECT * FROM students WHERE name LIKE %s", (f"%{name}%",))
+            "SELECT id, name, class, admission_date, balance FROM students WHERE name LIKE %s", (f"%{name}%",))
         results = cursor.fetchall()
         return results
     except mysql.connector.Error as err:
@@ -69,6 +69,21 @@ def create_student_pdf(student_id, name, logged_in_user):
 
         messagebox.showinfo(
             "Success", f"PDF created successfully at {pdf_path}")
+    except mysql.connector.Error as err:
+        messagebox.showerror("Error", f"Error: {err}")
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def update_student(student_id, name, student_class):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE students SET name = %s, class = %s WHERE id = %s", (name, student_class, student_id))
+        conn.commit()
+        messagebox.showinfo("Success", "Student updated successfully")
     except mysql.connector.Error as err:
         messagebox.showerror("Error", f"Error: {err}")
     finally:
