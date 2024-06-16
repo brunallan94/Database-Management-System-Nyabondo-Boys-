@@ -6,14 +6,15 @@ from reportlab.pdfgen import canvas
 import os
 
 
-def add_student(name, student_class):
+def add_student(name, student_class, admission_date, balance, admission_no, show_messagebox=True):
     conn = create_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "INSERT INTO students (name, class) VALUES (%s, %s)", (name, student_class))
+            "INSERT INTO students (name, class, admission_date, balance, admission_no) VALUES (%s, %s, %s, %s, %s)", (name, student_class, admission_date, balance, admission_no))
         conn.commit()
-        messagebox.showinfo("Success", "Student added successfully")
+        if show_messagebox:
+            messagebox.showinfo("Success", "Student added successfully")
     except mysql.connector.Error as err:
         messagebox.showerror("Error", f"Error: {err}")
     finally:
@@ -26,7 +27,7 @@ def search_students(name):
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "SELECT id, name, class, admission_date, balance FROM students WHERE name LIKE %s", (f"%{name}%",))
+            "SELECT id, name, class, admission_date, balance, admission_no FROM students WHERE name LIKE %s", (f"%{name}%",))
         results = cursor.fetchall()
         return results
     except mysql.connector.Error as err:
@@ -41,26 +42,28 @@ def create_student_pdf(student_id, name, logged_in_user):
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "SELECT name, class, admission_date, balance FROM students WHERE id = %s", (student_id,))
+            "SELECT name, class, admission_date, balance, admission_no FROM students WHERE id = %s", (student_id,))
         student_data = cursor.fetchone()
         if not student_data:
             messagebox.showerror("Error", "No student found with that ID")
             return
 
-        name, student_class, admission_date, balance = student_data
+        name, student_class, admission_date, balance, admission_no = student_data
 
         # Create PDF
         c = canvas.Canvas(f"{name}_student_details.pdf", pagesize=letter)
         c.drawString(100, 750, f"Name: {name}")
-        c.drawString(100, 725, f"Class: {student_class}")
-        c.drawString(100, 700, f"Admission Date: {admission_date}")
-        c.drawString(100, 675, f"Balance Remaining: {balance}")
+        c.drawString(100, 725, f"Admission Number: {admission_no}")
+        c.drawString(100, 700, f"Class: {student_class}")
+        c.drawString(100, 675, f"Admission Date: {admission_date}")
+        c.drawString(100, 650, f"Balance Remaining: {balance}")
 
         c.drawString(400, 750, f"Signed by: {logged_in_user}")
         c.drawString(400, 725, "Signature: ___________")
 
         # Save PDF to a specific directory
-        directory = "path/to/your/directory"  # Change this to your desired directory
+        # Change this to your desired directory
+        directory = os.path.join(os.environ['USERPROFILE'], 'Downloads')
         if not os.path.exists(directory):
             os.makedirs(directory)
 

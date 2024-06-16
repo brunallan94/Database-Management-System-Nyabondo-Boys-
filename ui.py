@@ -1,7 +1,6 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, filedialog, messagebox, HORIZONTAL, Tk
 from student import add_student, create_student_pdf, search_students, update_student
-from payment import handle_payment
 import pandas as pd
 
 
@@ -19,9 +18,25 @@ def create_student_ui(tab):
     class_entry = tk.Entry(frame)
     class_entry.grid(row=1, column=1, padx=5, pady=5)
 
+    admissiond_label = tk.Label(
+        frame, text='Admission Date (Use figures only e.g 2020, 2021)')
+    admissiond_label.grid(row=2, column=0, padx=5, pady=5)
+    admissiond_entry = tk.Entry(frame)
+    admissiond_entry.grid(row=2, column=1, padx=5, pady=5)
+
+    balance_label = tk.Label(frame, text='Balance')
+    balance_label.grid(row=3, column=0, padx=5, pady=5)
+    balance_entry = tk.Entry(frame)
+    balance_entry.grid(row=3, column=1, padx=5, pady=5)
+
+    admission_label = tk.Label(frame, text='Admission Number')
+    admission_label.grid(row=4, column=0, padx=5, pady=5)
+    admission_entry = tk.Entry(frame)
+    admission_entry.grid(row=4, column=1, padx=5, pady=5)
+
     add_button = tk.Button(frame, text='Add Student', command=lambda: add_student(
-        name_entry.get(), class_entry.get()))
-    add_button.grid(row=2, columnspan=2, pady=10)
+        name_entry.get(), class_entry.get(), admissiond_entry.get(), balance_entry.get(), admission_entry.get()))
+    add_button.grid(row=5, columnspan=2, pady=10)
 
 
 def create_search_student_ui(tab):
@@ -34,12 +49,14 @@ def create_search_student_ui(tab):
     search_entry.grid(row=0, column=1, padx=5, pady=5)
 
     result_tree = ttk.Treeview(frame, columns=(
-        'ID', 'Name', 'Class', 'Admission Date', 'Balance'), show='headings')
+        'ID', 'Name', 'Class', 'Admission Date', 'Balance', 'Admission Number'), show='headings')
     result_tree.heading('ID', text='ID')
     result_tree.heading('Name', text='Name')
     result_tree.heading('Class', text='Class')
     result_tree.heading('Admission Date', text='Admission Date')
     result_tree.heading('Balance', text='Balance')
+    result_tree.heading('Admission Number', text='Admission Number')
+
     result_tree.grid(row=1, column=0, columnspan=2, pady=10)
 
     def search_and_display():
@@ -98,30 +115,6 @@ def create_search_student_ui(tab):
         edit_frame.grid_remove()
 
 
-def create_payment_ui(tab):
-    frame = tk.Frame(tab)
-    frame.pack(padx=10, pady=10)
-
-    student_id_label = tk.Label(frame, text='Student ID')
-    student_id_label.grid(row=0, column=0, padx=5, pady=5)
-    student_id_entry = tk.Entry(frame)
-    student_id_entry.grid(row=0, column=1, padx=5, pady=5)
-
-    meal_id_label = tk.Label(frame, text='Meal ID')
-    meal_id_label.grid(row=1, column=0, padx=5, pady=5)
-    meal_id_entry = tk.Entry(frame)
-    meal_id_entry.grid(row=1, column=1, padx=5, pady=5)
-
-    amount_label = tk.Label(frame, text='Amount')
-    amount_label.grid(row=2, column=0, padx=5, pady=5)
-    amount_entry = tk.Entry(frame)
-    amount_entry.grid(row=2, column=1, padx=5, pady=5)
-
-    payment_button = tk.Button(frame, text='Record Payment', command=lambda: handle_payment(
-        student_id_entry.get(), meal_id_entry.get(), amount_entry.get()))
-    payment_button.grid(row=3, columnspan=2, pady=10)
-
-
 def create_download_and_upload_ui(tab, logged_in_user):
     frame = tk.Frame(tab)
     frame.pack(padx=10, pady=10)
@@ -137,11 +130,11 @@ def create_download_and_upload_ui(tab, logged_in_user):
     student_id_entry.grid(row=1, column=1, padx=5, pady=5)
 
     upload_button = tk.Button(frame, text='Upload', command=open_file)
-    upload_button.grid(row=2, columnspan=2, pady=10)
+    upload_button.grid(row=3, columnspan=2, pady=10)
 
     pdf_button = tk.Button(frame, text='Create PDF', command=lambda: create_student_pdf(
         student_id_entry.get(), name_entry.get(), logged_in_user))
-    pdf_button.grid(row=3, columnspan=2, pady=10)
+    pdf_button.grid(row=2, columnspan=2, pady=10)
 
 
 def open_file():
@@ -154,10 +147,33 @@ def open_file():
 def process_file(file_path):
     try:
         df = pd.read_excel(file_path)
-        # Assuming columns A, B, and C correspond to student_id, name, and class
+        # Create a top-level window for progress bar
+        progress_window = Tk()
+        progress_window.title('Processing data')
+
+        # Set up the progress bar
+        progress_bar = ttk.Progressbar(
+            progress_window, orient=HORIZONTAL, length=300, mode='determinate')
+        progress_bar.pack(pady=10)
+
+        # Calculate the step size for each update
+        step_size = 100 / len(df.index)
+
+        # Assuming columns A, B, and C correspond to student_id, name, and class, admission_date, balance, admission_no
         for index, row in df.iterrows():
-            add_student(row['Name'], row['Class'])
+            row = row.where(pd.notnull(row), None)
+            add_student(row['Name'], row['Class'], row['Admission Date'],
+                        row['Balance'], row['Admission Number'], show_messagebox=False)
+
+            # Update the progess bar
+            progress_bar['value'] += step_size
+            progress_window.update_idletasks()
+
         messagebox.showinfo(
             "Success", "File processed and students added successfully")
+
+        # close the progress window after completion
+        progress_window.destroy()
+
     except Exception as e:
         messagebox.showerror("Error", f"Failed to process file: {e}")
