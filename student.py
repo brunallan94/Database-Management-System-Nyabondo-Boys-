@@ -3,15 +3,20 @@ from db_connection import create_connection
 from tkinter import messagebox
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
 import os
+import num2words
+import datetime
 
-
-def add_student(name, student_class, admission_date, balance, admission_no, show_messagebox=True):
+def add_student(name, student_class, admission_date, balance, admission_no, grade, show_messagebox=True):
     conn = create_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "INSERT INTO students (name, class, admission_date, balance, admission_no) VALUES (%s, %s, %s, %s, %s)", (name, student_class, admission_date, balance, admission_no))
+            "INSERT INTO students (name, class, admission_date, balance, admission_no, grade) VALUES (%s, %s, %s, %s, %s, %s)", (name, student_class, admission_date, balance, admission_no, grade))
         conn.commit()
         if show_messagebox:
             messagebox.showinfo("Success", "Student added successfully")
@@ -27,7 +32,7 @@ def search_students(name):
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "SELECT id, name, class, admission_date, balance, admission_no FROM students WHERE name LIKE %s", (f"%{name}%",))
+            "SELECT id, name, class, admission_date, balance, admission_no, grade FROM students WHERE name LIKE %s", (f"%{name}%",))
         results = cursor.fetchall()
         return results
     except mysql.connector.Error as err:
@@ -50,25 +55,185 @@ def create_student_pdf(student_id, name, logged_in_user):
 
         name, student_class, admission_date, balance, admission_no = student_data
 
-        # Create PDF
-        c = canvas.Canvas(f"{name}_student_details.pdf", pagesize=letter)
-        c.drawString(100, 750, f"Name: {name}")
-        c.drawString(100, 725, f"Admission Number: {admission_no}")
-        c.drawString(100, 700, f"Class: {student_class}")
-        c.drawString(100, 675, f"Admission Date: {admission_date}")
-        c.drawString(100, 650, f"Balance Remaining: {balance}")
-
-        c.drawString(400, 750, f"Signed by: {logged_in_user}")
-        c.drawString(400, 725, "Signature: ___________")
-
         # Save PDF to a specific directory
-        # Change this to your desired directory
-        directory = os.path.join(os.environ['USERPROFILE'], 'Downloads')
+        directory = os.path.join(os.path.expanduser('~'), 'Downloads', 'Nyabondo_boys_meals')
+        # Create directory if it doesn't exist
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        pdf_path = os.path.join(directory, f"{name}_student_details.pdf")
-        c.save()
+        pdf_path = os.path.join(directory, f"{name}_meal_information.pdf")
+        # Create pdf
+        def number_to_words(balance):
+            return num2words.num2words(balance, to='cardinal')
+
+        image = 'logo.JPG'
+        title = 'Nyabondo Boys Boarding Comprehensive School'
+        subTitle01 = 'PO Box 212-Sondu Tel: 0741449228/0741455491'
+        subTitle02 = 'Email: nyabondobb@yahoo.com'
+        subTitle03 = 'SCHOOL OFFICIAL RECEIPT'
+        receipt_no = 1
+        date = datetime.time()
+        admission_date = 2021
+        signed = 'admin'
+
+        pdf = canvas.Canvas(f"{name}_student_details.pdf", pagesize=letter)
+        pdf.setTitle('Creating a pdf')
+
+        # Vertical boundary line
+        pdf.line(50, 800, 50, 100)  # Left
+        pdf.line(550, 800, 550, 100)  # Right
+
+        # Horizontal boundary line
+        pdf.line(50, 800, 550, 800)  # Top
+        pdf.line(50, 100, 550, 100)  # Bottom
+
+        # Draw an image
+        pdf.drawInlineImage(image, 60, 700)
+
+        # Title
+        pdf.setFont('Courier-Bold', 14)
+        pdf.drawString(170, 770, title)
+        pdf.line(170, 765, 530, 765)
+
+        # SubTitle 1
+        pdf.setFillColorRGB(0, 0, 255)
+        pdf.setFont('Times-Roman', 14)
+        pdf.drawString(170, 740, subTitle01)
+        pdf.line(170, 735, 450, 735)
+
+        # SubTitle 2
+        pdf.drawString(250, 710, subTitle02)
+        pdf.line(250, 705, 430, 705)
+
+        # SubTitle 3
+        pdf.drawString(230, 680, subTitle03)
+        pdf.line(230, 675, 420, 675)
+
+        # SubTitle 4
+        pdf.drawString(60, 650, f'Receipt No: {receipt_no}')
+        pdf.drawString(250, 650, f'Adm No: {admission_no}')
+        pdf.drawString(400, 650, f'Date: {date}')
+
+        # SubTitle 5
+        pdf.drawString(60, 630, f'Received From: {name}')
+        pdf.drawString(400, 630, f'Class {student_class}')
+        pdf.line(50, 625, 550, 625)
+
+        # SubTitle 6
+        pdf.drawString(60, 600, f'Sum of Kshs: {number_to_words(balance)}')
+
+        # Heading
+        pdf.setFillColorRGB(r=0, g=0, b=0)
+        pdf.setFont('Times-Roman', 14)
+        pdf.drawString(80, 570, 'Vote head')  # Vote head
+        pdf.drawString(460, 570, 'Amount (Kshs)')  # Amount (Kshs)
+
+        # Internal horizontal line
+        pdf.line(70, 590, 550, 590)  # Top 1
+        pdf.line(70, 550, 550, 550)  # Top 2
+        pdf.line(70, 200, 550, 200)  # Bottom 1
+        pdf.line(70, 160, 550, 160)  # Bottom 2
+
+        # Internal vertical line
+        pdf.line(70, 590, 70, 160)  # Left
+
+        # Text
+        pdf.drawString(80, 180, 'Total:')  # Total
+        pdf.drawString(490, 180, f'{balance:,}')  # Amount: 134
+
+        pdf.save()
+
+        # Create PDF
+
+       # c.drawString(400, 750, f"Signed by: {logged_in_user}")
+        #c.drawString(400, 725, "Signature: ___________")
+
+        messagebox.showinfo(
+            "Success", f"PDF created successfully at {pdf_path}")
+    except mysql.connector.Error as err:
+        messagebox.showerror("Error", f"Error: {err}")
+    finally:
+        cursor.close()
+        conn.close()
+
+def create_all_student_pdf(student_id, name, logged_in_user, selected_grade):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "SELECT name, class, admission_date, balance, admission_no, grade FROM students WHERE grade = %s", (selected_grade,))
+        student_data = cursor.fetchall()
+        if not student_data:
+            messagebox.showerror("Error", "No student found in the selected grade")
+            return
+
+        # Save PDF to a specific directory
+        directory = os.path.join(os.path.expanduser('~'), 'Downloads', 'Nyabondo_boys_meals')
+        # Create directory if it doesn't exist
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        pdf_path = os.path.join(directory, f"Grade_{selected_grade}_students_meal_information.pdf")
+
+        # Create PDF document
+        pdf = SimpleDocTemplate(pdf_path, pagesize=letter)
+
+        # PDF Content
+        image_path = 'logo.JPG'
+        title = 'Nyabondo Boys Boarding Comprehensive School'
+        subTitle01 = 'PO Box 212-Sondu Tel: 0741449228/0741455491'
+        subTitle02 = 'Email: nyabondobb@yahoo.com'
+        subTitle03 = 'SCHOOL OFFICIAL RECEIPT'
+        date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        receipt_no = 1
+
+        # Styles
+        styles = getSampleStyleSheet()
+        styleH = styles['Heading1']
+        styleN = styles['Normal']
+
+        # Build the PDF elements
+        elements = []
+
+        # Draw an image
+        if os.path.exists(image_path):
+            img = Image(image_path)
+            img.drawHeight = 1.25 * inch
+            img.drawWidth = 1.25 * inch
+            elements.append(img)
+
+        # Title and Subtitle
+        elements.append(Paragraph(title, styleH))
+        elements.append(Paragraph(subTitle01, styleN))
+        elements.append(Paragraph(subTitle02, styleN))
+        elements.append(Paragraph(subTitle03, styleN))
+        elements.append(Paragraph(f'Date: {date}', styleN))
+        elements.append(Spacer(1, 12))
+
+        # Table data
+        data = [['Name', 'Class', 'Admission Date', 'Balance', 'Admission No']]
+        for student in student_data:
+            data.append(list(student))
+
+        # Create a Table
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+        elements.append(table)
+
+        # Footer
+        elements.append(Spacer(1, 48))
+        elements.append(Paragraph(f'Signed by: {logged_in_user}', styleN))
+
+        # Build the pdf
+        pdf.build(elements)
 
         messagebox.showinfo(
             "Success", f"PDF created successfully at {pdf_path}")
@@ -79,12 +244,12 @@ def create_student_pdf(student_id, name, logged_in_user):
         conn.close()
 
 
-def update_student(student_id, name, student_class):
+def update_student(student_id, name, balance):
     conn = create_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "UPDATE students SET name = %s, class = %s WHERE id = %s", (name, student_class, student_id))
+            "UPDATE students SET name = %s, balance = %s WHERE id = %s", (name, balance, student_id))
         conn.commit()
         messagebox.showinfo("Success", "Student updated successfully")
     except mysql.connector.Error as err:

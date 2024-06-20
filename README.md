@@ -32,3 +32,6 @@ e). payment.py
 f). student.py -
 -Handles the student data by: 1. Inserting student data into the database. 2. Searching for students from the database throught the ui. 3. Updating student data in the database. 4. Deleting student data from the database. 5. Creates a pdf that holds students data.
 -It has 5 functions: insert_student(), search_student(), update_student(), delete_student().
+
+g). tester.py
+-Connects all the ui elements in one place.

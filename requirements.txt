@@ -1,4 +1,8 @@
-mysql-connector-python
-tkinter
-os
-pandas
+mysql-connector-python~=8.4.0
+pip install tk (tkinter)
+os (in built python module)
+pip install pandas
+pip install reportlab
+pandas~=2.2.2
+reportlab~=4.2.0
+num2words~=0.5.13
