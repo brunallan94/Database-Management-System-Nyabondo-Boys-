@@ -11,12 +11,15 @@ import os
 import num2words
 import datetime
 
-def add_student(name, student_class, admission_date, balance, admission_no, grade, show_messagebox=True):
+
+def add_student(name, admission_no, stream, grade, amount_expected, amount_paid, balance, term, year, show_messagebox=True):
     conn = create_connection()
     cursor = conn.cursor()
+    table_name = f'year_{year}_term_{term}' # Construct the table name based on term and year
     try:
         cursor.execute(
-            "INSERT INTO students (name, class, admission_date, balance, admission_no, grade) VALUES (%s, %s, %s, %s, %s, %s)", (name, student_class, admission_date, balance, admission_no, grade))
+            f"INSERT INTO {table_name} (name, admission_no, stream, grade, amount_expected, amount_paid, balance) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            (name, admission_no, stream, grade, amount_expected, amount_paid, balance))
         conn.commit()
         if show_messagebox:
             messagebox.showinfo("Success", "Student added successfully")
@@ -27,12 +30,14 @@ def add_student(name, student_class, admission_date, balance, admission_no, grad
         conn.close()
 
 
-def search_students(name):
+def search_students(name, term, year):
     conn = create_connection()
     cursor = conn.cursor()
+    table_name = f'year_{year}_term_{term}' # Construct the table name based on term and year
+
     try:
-        cursor.execute(
-            "SELECT id, name, class, admission_date, balance, admission_no, grade FROM students WHERE name LIKE %s", (f"%{name}%",))
+        cursor.execute(f"SELECT id, name, admission_no, stream, grade, amount_expected, amount_paid, balance FROM {table_name} WHERE name LIKE %s",
+            (f"%{name}%",))
         results = cursor.fetchall()
         return results
     except mysql.connector.Error as err:
@@ -42,18 +47,19 @@ def search_students(name):
         conn.close()
 
 
-def create_student_pdf(student_id, name, logged_in_user):
+def create_student_pdf(student_id, name, logged_in_user, term, year):
     conn = create_connection()
     cursor = conn.cursor()
+    table_name = f'year_{year}_term_{term}' # Construct the table name based on term and year
+
     try:
-        cursor.execute(
-            "SELECT name, class, admission_date, balance, admission_no FROM students WHERE id = %s", (student_id,))
+        cursor.execute(f"SELECT name, admission_no, stream, grade, amount_expected, amount_paid, balance, FROM {table_name} WHERE id = %s", (student_id,))
         student_data = cursor.fetchone()
         if not student_data:
             messagebox.showerror("Error", "No student found with that ID")
             return
 
-        name, student_class, admission_date, balance, admission_no = student_data
+        name, admission_no, stream, grade, amount_expected, amount_paid, balance = student_data
 
         # Save PDF to a specific directory
         directory = os.path.join(os.path.expanduser('~'), 'Downloads', 'Nyabondo_boys_meals')
@@ -62,6 +68,7 @@ def create_student_pdf(student_id, name, logged_in_user):
             os.makedirs(directory)
 
         pdf_path = os.path.join(directory, f"{name}_meal_information.pdf")
+
         # Create pdf
         def number_to_words(balance):
             return num2words.num2words(balance, to='cardinal')
@@ -72,12 +79,12 @@ def create_student_pdf(student_id, name, logged_in_user):
         subTitle02 = 'Email: nyabondobb@yahoo.com'
         subTitle03 = 'SCHOOL OFFICIAL RECEIPT'
         receipt_no = 1
-        date = datetime.time()
+        date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
         admission_date = 2021
         signed = 'admin'
 
         pdf = canvas.Canvas(f"{name}_student_details.pdf", pagesize=letter)
-        pdf.setTitle('Creating a pdf')
+        pdf.setTitle('Personal student meal information receipt')
 
         # Vertical boundary line
         pdf.line(50, 800, 50, 100)  # Left
@@ -116,7 +123,7 @@ def create_student_pdf(student_id, name, logged_in_user):
 
         # SubTitle 5
         pdf.drawString(60, 630, f'Received From: {name}')
-        pdf.drawString(400, 630, f'Class {student_class}')
+        pdf.drawString(400, 630, f'Class {grade}{stream}')
         pdf.line(50, 625, 550, 625)
 
         # SubTitle 6
@@ -141,12 +148,16 @@ def create_student_pdf(student_id, name, logged_in_user):
         pdf.drawString(80, 180, 'Total:')  # Total
         pdf.drawString(490, 180, f'{balance:,}')  # Amount: 134
 
+        # Footer
+        pdf.drawString(80, 145, f'Term 2 Fees balance:')
+        pdf.drawString(490, 145, f'{balance}')
+        pdf.drawString(60, 130, 'Mode of Payment:')
+        pdf.drawString(490, 130, f'MPESA')
+        pdf.drawString(60, 110, 'Served By:')
+        pdf.drawString(300, 110, f'{logged_in_user}')
+        pdf.line(350, 110, 490, 110)
+
         pdf.save()
-
-        # Create PDF
-
-       # c.drawString(400, 750, f"Signed by: {logged_in_user}")
-        #c.drawString(400, 725, "Signature: ___________")
 
         messagebox.showinfo(
             "Success", f"PDF created successfully at {pdf_path}")
@@ -156,12 +167,16 @@ def create_student_pdf(student_id, name, logged_in_user):
         cursor.close()
         conn.close()
 
-def create_all_student_pdf(student_id, name, logged_in_user, selected_grade):
+
+def create_all_student_pdf(student_id, name, logged_in_user, selected_grade, year, term):
     conn = create_connection()
     cursor = conn.cursor()
+    table_name = f'year_{year}_term_{term}' # Construct the table name based on term and year
+
     try:
         cursor.execute(
-            "SELECT name, class, admission_date, balance, admission_no, grade FROM students WHERE grade = %s", (selected_grade,))
+            f"SELECT name, admission_no, stream, grade, amount_expected, amount_paid, balance FROM {table_name} WHERE grade = %s",
+            (selected_grade,))
         student_data = cursor.fetchall()
         if not student_data:
             messagebox.showerror("Error", "No student found in the selected grade")
@@ -211,9 +226,9 @@ def create_all_student_pdf(student_id, name, logged_in_user, selected_grade):
         elements.append(Spacer(1, 12))
 
         # Table data
-        data = [['Name', 'Class', 'Admission Date', 'Balance', 'Admission No']]
-        for student in student_data:
-            data.append(list(student))
+        data = [['No', 'Name', 'Admission No', 'Stream', 'Grade', 'Amount Expected', 'Amount Paid', 'Balance']]
+        for idx, student in enumerate(student_data, start=1):
+            data.append([idx] + list(student))
 
         # Create a Table
         table = Table(data)
@@ -244,12 +259,14 @@ def create_all_student_pdf(student_id, name, logged_in_user, selected_grade):
         conn.close()
 
 
-def update_student(student_id, name, balance):
+def update_student(student_id, name, balance, year, term):
     conn = create_connection()
     cursor = conn.cursor()
+    table_name = f'year_{year}_term_{term}' # Construct the table name based on term and year
+
     try:
         cursor.execute(
-            "UPDATE students SET name = %s, balance = %s WHERE id = %s", (name, balance, student_id))
+            f"UPDATE {table_name} SET name = %s, balance = %s WHERE id = %s", (name, balance, student_id))
         conn.commit()
         messagebox.showinfo("Success", "Student updated successfully")
     except mysql.connector.Error as err:

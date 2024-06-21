@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, HORIZONTAL, Tk
 from student import add_student, create_student_pdf, search_students, update_student, create_all_student_pdf
 import pandas as pd
+import threading
 
 # Initialize selected student_id
 selected_student_id = None
@@ -11,40 +12,62 @@ def create_student_ui(tab):
     frame = tk.Frame(tab)
     frame.grid(padx=10, pady=10)
 
+    # Create a dropdown menu for term and year
+    terms = [1, 2, 3]
+    years = [2024, 2025, 2026]
+    term_var = tk.StringVar()
+    year_var = tk.StringVar()
+    term_var.set(terms[0])  # Set the default value
+    year_var.set(years[0])
+    term_dropdown = tk.OptionMenu(frame, term_var, *terms)
+    year_dropdown = tk.OptionMenu(frame, year_var, *years)
+    term_dropdown.grid(row=0, column=1, padx=5, pady=5)
+    year_dropdown.grid(row=1, column=1, padx=5, pady=5)
+    term_label = tk.Label(frame, text='Term: ')
+    term_label.grid(row=0, column=0)
+    year_label = tk.Label(frame, text='Year: ')
+    year_label.grid(row=1, column=0)
+
     name_label = tk.Label(frame, text='Name')
-    name_label.grid(row=0, column=0, padx=5, pady=5)
+    name_label.grid(row=2, column=0, padx=5, pady=5)
     name_entry = tk.Entry(frame)
-    name_entry.grid(row=0, column=1, padx=5, pady=5)
-
-    class_label = tk.Label(frame, text='Class')
-    class_label.grid(row=1, column=0, padx=5, pady=5)
-    class_entry = tk.Entry(frame)
-    class_entry.grid(row=1, column=1, padx=5, pady=5)
-
-    admissiond_label = tk.Label(
-        frame, text='Admission Date (Use figures only e.g 2020, 2021)')
-    admissiond_label.grid(row=2, column=0, padx=5, pady=5)
-    admissiond_entry = tk.Entry(frame)
-    admissiond_entry.grid(row=2, column=1, padx=5, pady=5)
-
-    balance_label = tk.Label(frame, text='Balance')
-    balance_label.grid(row=3, column=0, padx=5, pady=5)
-    balance_entry = tk.Entry(frame)
-    balance_entry.grid(row=3, column=1, padx=5, pady=5)
+    name_entry.grid(row=2, column=1, padx=5, pady=5)
 
     admission_label = tk.Label(frame, text='Admission Number')
-    admission_label.grid(row=4, column=0, padx=5, pady=5)
+    admission_label.grid(row=3, column=0, padx=5, pady=5)
     admission_entry = tk.Entry(frame)
-    admission_entry.grid(row=4, column=1, padx=5, pady=5)
+    admission_entry.grid(row=3, column=1, padx=5, pady=5)
 
-    grade_label = tk.Label(frame, text= 'Grade')
+    stream_label = tk.Label(frame, text='Stream')
+    stream_label.grid(row=4, column=0, padx=5, pady=5)
+    stream_entry = tk.Entry(frame)
+    stream_entry.grid(row=4, column=1, padx=5, pady=5)
+
+    grade_label = tk.Label(frame, text='Grade')
     grade_label.grid(row=5, column=0, padx=5, pady=5)
     grade_entry = tk.Entry(frame)
     grade_entry.grid(row=5, column=1, padx=5, pady=5)
 
-    add_button = tk.Button(frame, text='Add Student', command=lambda: add_student(
-        name_entry.get(), class_entry.get(), admissiond_entry.get(), balance_entry.get(), admission_entry.get(), grade_entry.get()))
-    add_button.grid(row=6, columnspan=2, pady=10)
+    amntexp_label = tk.Label(frame, text='Amount Expected')
+    amntexp_label.grid(row=6, column=0, padx=5, pady=5)
+    amntexp_entry = tk.Entry(frame)
+    amntexp_entry.grid(row=6, column=1, padx=5, pady=5)
+
+    amntpaid_label = tk.Label(frame, text='Amount Paid')
+    amntpaid_label.grid(row=7, column=0, padx=5, pady=5)
+    amntpaid_entry = tk.Entry(frame)
+    amntpaid_entry.grid(row=7, column=1, padx=5, pady=5)
+
+    balance_label = tk.Label(frame, text='Balance')
+    balance_label.grid(row=8, column=0, padx=5, pady=5)
+    balance_entry = tk.Entry(frame)
+    balance_entry.grid(row=8, column=1, padx=5, pady=5)
+
+    add_button = tk.Button(frame, text='Add Student',
+                           command=lambda: add_student(name_entry.get(), admission_entry.get(), stream_entry.get(),
+                                                       grade_entry.get(), amntexp_entry.get(), amntpaid_entry.get(),
+                                                       balance_entry.get(), term_var.get(), year_var.get()))
+    add_button.grid(row=9, column=2, columnspan=2, pady=10)
 
 
 def create_search_student_ui(tab):
@@ -55,18 +78,34 @@ def create_search_student_ui(tab):
     search_label.grid(row=0, column=0, padx=5, pady=5)
     search_entry = tk.Entry(frame)
     search_entry.grid(row=0, column=1, padx=5, pady=5)
+    # Create a dropdown menu
+    terms = [1, 2, 3]
+    years = [2024, 2025, 2026]
+    term_var = tk.StringVar()
+    year_var = tk.StringVar()
+    term_var.set(terms[0])  # Set the default value
+    year_var.set(years[0])
+    term_dropdown = tk.OptionMenu(frame, term_var, *terms)
+    year_dropdown = tk.OptionMenu(frame, year_var, *years)
+    term_dropdown.grid(row=0, column=3, padx=5, pady=5)
+    year_dropdown.grid(row=1, column=5, padx=5, pady=5)
+    term_label = tk.Label(frame, text='Term: ')
+    term_label.grid(row=0, column=2)
+    year_label = tk.Label(frame, text='Year: ')
+    year_label.grid(row=0, column=4)
 
     result_tree = ttk.Treeview(frame, columns=(
-        'ID', 'Name', 'Class', 'Admission Date', 'Balance', 'Admission Number', 'Grade'), show='headings')
+    'ID', 'Name', 'Admission Number', 'Stream', 'Grade', 'Amount Expected', 'Amount Paid', 'Balance'), show='headings')
     result_tree.heading('ID', text='ID')
     result_tree.heading('Name', text='Name')
-    result_tree.heading('Class', text='Class')
-    result_tree.heading('Admission Date', text='Admission Date')
-    result_tree.heading('Balance', text='Balance')
     result_tree.heading('Admission Number', text='Admission Number')
+    result_tree.heading('Stream', text='Stream')
     result_tree.heading('Grade', text='Grade')
+    result_tree.heading('Amount Expected', text='Amount Expected')
+    result_tree.heading('Amount Paid', text='Amount Paid')
+    result_tree.heading('Balance', text='Balance')
 
-    result_tree.grid(row=1, column=0, columnspan=3, pady=10, sticky='news')
+    result_tree.grid(row=1, column=0, columnspan=4, pady=10, sticky='news')
 
     # Configure grid weights to allow treeview to expand
     frame.grid_rowconfigure(1, weight=1)
@@ -89,8 +128,7 @@ def create_search_student_ui(tab):
     edit_balance_entry = tk.Entry(edit_frame)
     edit_balance_entry.grid(row=2, column=1, padx=5, pady=5)
 
-    save_button = tk.Button(edit_frame, text='Save',
-                            command=lambda: update_student_info(search_entry, result_tree))
+    save_button = tk.Button(edit_frame, text='Save', command=lambda: update_student_info(search_entry, result_tree))
     save_button.grid(row=3, columnspan=2, pady=10)
 
     def on_edit_selected(event):
@@ -104,7 +142,7 @@ def create_search_student_ui(tab):
         edit_name_entry.delete(0, tk.END)
         edit_name_entry.insert(0, values[1])
         edit_balance_entry.delete(0, tk.END)
-        edit_balance_entry.insert(0, values[4])
+        edit_balance_entry.insert(0, values[-1])
         edit_frame.grid()
 
     result_tree.bind('<Double-1>', on_edit_selected)
@@ -122,15 +160,16 @@ def create_search_student_ui(tab):
         edit_frame.grid_remove()  # Hide edit form after update
         selected_student_id = None  # Reset selected student_id after updating
 
-    def search_and_display(search_query, tree):
-        results = search_students(search_query)
+    def search_and_display(search_query,term, year, tree):
+        results = search_students(search_query, term, year)
+        # Clear the existing contents of the tree
         for row in tree.get_children():
             tree.delete(row)
+        # Insert new search results
         for result in results:
             tree.insert('', 'end', values=result)
 
-    search_button = tk.Button(
-        frame, text='Search', command=lambda: search_and_display(search_entry.get(), result_tree))
+    search_button = tk.Button(frame, text='Search', command=lambda: search_and_display(search_entry.get(), term_var.get(), year_var.get(), result_tree))
     search_button.grid(row=0, column=2, padx=5, pady=5)
 
 
@@ -164,42 +203,66 @@ def create_download_and_upload_ui(tab, logged_in_user):
     grade_dropdown = tk.OptionMenu(frame, grade_var, *grades)
     grade_dropdown.grid(row=3, column=1, padx=5, pady=5)
 
-    generate_button = tk.Button(frame, text='Generate all students PDF', command=lambda: create_all_student_pdf(student_id_entry.get(), name_entry.get(), logged_in_user, grade_var.get()))
+    generate_button = tk.Button(frame, text='Generate all students PDF',
+                                command=lambda: create_all_student_pdf(student_id_entry.get(), name_entry.get(),
+                                                                       logged_in_user, grade_var.get()))
     generate_button.grid(row=4, columnspan=2, padx=5, pady=5)
 
-    upload_button = tk.Button(frame, text='Upload from Excel', command=open_file)
+
+def create_upload_ui(tab):
+    frame = tk.Frame(tab)
+    frame.pack(padx=10, pady=10)
+
+    # Create a dropdown menu
+    terms = [1, 2, 3]
+    years = [2024, 2025, 2026]
+    term_var = tk.StringVar()
+    year_var = tk.StringVar()
+    term_var.set(terms[0])  # Set the default value
+    year_var.set(years[0])
+    term_dropdown = tk.OptionMenu(frame, term_var, *terms)
+    year_dropdown = tk.OptionMenu(frame, year_var, *years)
+    term_dropdown.grid(row=0, column=1, padx=5, pady=5)
+    year_dropdown.grid(row=1, column=1, padx=5, pady=5)
+    term_label = tk.Label(frame, text='Term: ')
+    term_label.grid(row=0, column=0)
+    year_label = tk.Label(frame, text='Year: ')
+    year_label.grid(row=1, column=0)
+
+    upload_button = tk.Button(frame, text='Upload', command=open_file)
     upload_button.grid(row=5, columnspan=2, pady=10)
 
 
 def open_file():
-    file_path = filedialog.askopenfilename(
-        filetypes=[('Excel Files', '*.xlsx *.xlsm *.sxc *.ods *.csv *.tsv')])
+    file_path = filedialog.askopenfilename(filetypes=[('Excel Files', '*.xlsx *.xlsm *.sxc *.ods *.csv *.tsv')])
     if file_path:
         process_file(file_path)
 
 
 def process_file(file_path):
+    # Create a top-level window for progress bar
+    progress_window = Tk()
+    progress_window.title('Processing data')
+
+    # Set up the progress bar
+    progress_bar = ttk.Progressbar(progress_window, orient=HORIZONTAL, length=300, mode='determinate')
+    progress_bar.pack(pady=10)
+
+    # Start the data processing in a separate thread
+    threading.Thread(target=process_data, args=(file_path, progress_bar, progress_window)).start()
+
+
+def process_data(file_path, progress_bar, progress_window):
     try:
         df = pd.read_excel(file_path)
-        # Create a top-level window for progress bar
-        progress_window = Tk()
-        progress_window.title('Processing data')
-
-        # Set up the progress bar
-        progress_bar = ttk.Progressbar(
-            progress_window, orient=HORIZONTAL, length=300, mode='determinate')
-        progress_bar.pack(pady=10)
-
         # Calculate the step size for each update
         step_size = 100 / len(df.index)
-
-        # Assuming columns A, B, and C correspond to student_id, name, and class, admission_date, balance, admission_no, grade
+        # Assuming columns A, B, and C correspond to student_id, name, admission_no, stream, grade, amount_expected, amount_paid, balance
         for index, row in df.iterrows():
             row = row.where(pd.notnull(row), None)
-            add_student(row['Name'], row['Class'], row['Admission Date'],
-                        row['Balance'], row['Admission Number'],row['Grade'], show_messagebox=False)
+            add_student(row['Name'], row['Admission Number'], row['Stream'], row['Grade'], row['Amount Expected'], row['Amount Paid', row['Balance']], show_messagebox=False)
 
-            # Update the progess bar
+            # Update the progress bar
             progress_bar['value'] += step_size
             progress_window.update_idletasks()
 

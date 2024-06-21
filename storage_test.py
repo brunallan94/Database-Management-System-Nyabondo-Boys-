@@ -1,8 +1,7 @@
 import os
 
 # Define the directory path
-directory = os.path.join(os.path.expanduser(
-    '~'), 'Downloads', 'test_files_directory')
+directory = os.path.join(os.path.expanduser('~'), 'Downloads', 'test_files_directory')
 
 # Create the directory if it doesn't exist
 if not os.path.exists(directory):
