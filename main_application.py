@@ -1,4 +1,4 @@
-from ui import create_student_ui, create_search_student_ui, create_download_and_upload_ui, create_upload_ui
+from ui import create_student_ui, create_search_student_ui, create_download_ui, create_upload_ui
 import tkinter as tk
 from tkinter import ttk
 
@@ -23,7 +23,7 @@ def open_main_application(logged_in_user):
 
     create_student_ui(add_student_tab)
     create_search_student_ui(search_student_tab)
-    create_download_and_upload_ui(download_and_upload_tab, logged_in_user)
+    create_download_ui(download_and_upload_tab, logged_in_user)
     create_upload_ui(upload_tab)
 
     root.mainloop()
