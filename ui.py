@@ -4,6 +4,7 @@ from student import add_student, create_student_pdf, search_students, update_stu
 import pandas as pd
 import threading
 
+
 # Initialize selected student_id
 selected_student_id = None
 
@@ -100,7 +101,8 @@ def create_search_student_ui(tab):
     search_frame.grid(padx=15, pady=15, sticky='news')
 
     result_tree = ttk.Treeview(search_frame, columns=(
-    'ID', 'Name', 'Admission Number', 'Stream', 'Grade', 'Amount Expected', 'Amount Paid', 'Balance'), show='headings')
+        'ID', 'Name', 'Admission Number', 'Stream', 'Grade', 'Amount Expected', 'Amount Paid', 'Balance'),
+                               show='headings')
     result_tree.heading('ID', text='ID')
     result_tree.heading('Name', text='Name')
     result_tree.heading('Admission Number', text='Admission Number')
@@ -192,8 +194,10 @@ def create_search_student_ui(tab):
         global selected_student_id
 
         # update student into the database
-        update_student(selected_student_id, edit_name_entry.get(), edit_admission_no_entry.get(), edit_stream_entry.get(), edit_grade_entry.get(),
-                       edit_amountexp_entry.get(), edit_amountpaid_entry.get(), edit_balance_entry.get(), year_var.get(), term_var.get())
+        update_student(selected_student_id, edit_name_entry.get(), edit_admission_no_entry.get(),
+                       edit_stream_entry.get(), edit_grade_entry.get(),
+                       edit_amountexp_entry.get(), edit_amountpaid_entry.get(), edit_balance_entry.get(),
+                       year_var.get(), term_var.get())
 
         # Refresh the tree view/ search results
         search_and_display()
@@ -273,7 +277,8 @@ def create_download_ui(tab, logged_in_user):
 
     generate_button = tk.Button(frame_m, text='Generate all students PDF',
                                 command=lambda: create_all_student_pdf(student_id_entry.get(), name_entry.get(),
-                                                                       year_var.get(), term_var.get(),logged_in_user, grade_var.get()))
+                                                                       year_var.get(), term_var.get(), logged_in_user,
+                                                                       grade_var.get()))
     generate_button.grid(row=4, columnspan=2, padx=5, pady=5)
 
 
@@ -297,48 +302,40 @@ def create_upload_ui(tab):
     year_label = tk.Label(frame, text='Year: ')
     year_label.grid(row=1, column=0)
 
-    upload_button = tk.Button(frame, text='Upload', command=open_file)
+    upload_button = tk.Button(frame, text='Upload', command=lambda: open_file())
     upload_button.grid(row=5, columnspan=2, pady=10)
 
+    def open_file():
+        file_path = filedialog.askopenfilename(filetypes=[('Excel Files', '*.xlsx *.xlsm *.sxc *.ods *.csv *.tsv')])
+        if file_path:
+            threading.Thread(target=process_file, args=(file_path,)).start()
 
-def open_file():
-    file_path = filedialog.askopenfilename(filetypes=[('Excel Files', '*.xlsx *.xlsm *.sxc *.ods *.csv *.tsv')])
-    if file_path:
-        process_file(file_path)
+    def process_file(file_path):
+        # Create a top-level window for progress bar
+        progress_window = Tk()
+        progress_window.title('Processing data')
 
+        # Set up the progress bar
+        progress_bar = ttk.Progressbar(progress_window, orient=HORIZONTAL, length=300, mode='determinate')
+        progress_bar.pack(pady=10)
+        try:
+            df = pd.read_excel(file_path)
+            # Calculate the step size for each update
+            step_size = 100 / len(df.index)
+            # Assuming columns A, B, and C correspond to student_id, name, admission_no, stream, grade, amount_expected, amount_paid, balance
+            for index, row in df.iterrows():
+                row = row.where(pd.notnull(row), None)
+                add_student(row['Name'], row['Admission Number'], row['Stream'], row['Grade'], row['Amount Expected'],
+                            row['Amount Paid'], row['Balance'], term_var.get(), year_var.get(), show_messagebox=False)
 
-def process_file(file_path):
-    # Create a top-level window for progress bar
-    progress_window = Tk()
-    progress_window.title('Processing data')
+                # Update the progress bar
+                progress_bar['value'] += step_size
+                progress_window.update_idletasks()
 
-    # Set up the progress bar
-    progress_bar = ttk.Progressbar(progress_window, orient=HORIZONTAL, length=300, mode='determinate')
-    progress_bar.pack(pady=10)
+            messagebox.showinfo("Success", "File processed and students added successfully")
 
-    # Start the data processing in a separate thread
-    threading.Thread(target=process_data, args=(file_path, progress_bar, progress_window)).start()
+            # close the progress window after completion
+            progress_window.destroy()
 
-
-def process_data(file_path, progress_bar, progress_window):
-    try:
-        df = pd.read_excel(file_path)
-        # Calculate the step size for each update
-        step_size = 100 / len(df.index)
-        # Assuming columns A, B, and C correspond to student_id, name, admission_no, stream, grade, amount_expected, amount_paid, balance
-        for index, row in df.iterrows():
-            row = row.where(pd.notnull(row), None)
-            add_student(row['Name'], row['Admission Number'], row['Stream'], row['Grade'], row['Amount Expected'], row['Amount Paid', row['Balance']], show_messagebox=False)
-
-            # Update the progress bar
-            progress_bar['value'] += step_size
-            progress_window.update_idletasks()
-
-        messagebox.showinfo(
-            "Success", "File processed and students added successfully")
-
-        # close the progress window after completion
-        progress_window.destroy()
-
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to process file: {e}")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to process file: {e}")

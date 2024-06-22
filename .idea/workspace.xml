@@ -6,10 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="b654b578-b0a6-4b9e-a3e1-b68ca5f9d405" name="Changes" comment="seventh commit">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/excel_tkinter_test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main_application.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_application.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pdf_test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/student.py" beforeDir="false" afterPath="$PROJECT_DIR$/student.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/ui.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
