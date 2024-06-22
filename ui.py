@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, HORIZONTAL, Tk
 from student import add_student, create_student_pdf, search_students, update_student, create_all_student_pdf
 import pandas as pd
-import threading
 
 
 # Initialize selected student_id
@@ -308,16 +307,19 @@ def create_upload_ui(tab):
     def open_file():
         file_path = filedialog.askopenfilename(filetypes=[('Excel Files', '*.xlsx *.xlsm *.sxc *.ods *.csv *.tsv')])
         if file_path:
-            threading.Thread(target=process_file, args=(file_path,)).start()
+            process_file(file_path)
 
     def process_file(file_path):
         # Create a top-level window for progress bar
-        progress_window = Tk()
+        progress_window = tk.Toplevel()
         progress_window.title('Processing data')
 
         # Set up the progress bar
         progress_bar = ttk.Progressbar(progress_window, orient=HORIZONTAL, length=300, mode='determinate')
         progress_bar.pack(pady=10)
+
+        lb = tk.Label(progress_window, text='', font='arial 15 bold')
+        lb.pack(padx=80)
         try:
             df = pd.read_excel(file_path)
             # Calculate the step size for each update
@@ -330,6 +332,7 @@ def create_upload_ui(tab):
 
                 # Update the progress bar
                 progress_bar['value'] += step_size
+                lb.config(text=f'{int(progress_bar['value'])}%')
                 progress_window.update_idletasks()
 
             messagebox.showinfo("Success", "File processed and students added successfully")
