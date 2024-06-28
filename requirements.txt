@@ -1,5 +1,6 @@
-mysql-connector-python~=8.4.0 # pip install mysql.connector
-pandas~=2.2.2 # Pip install pandas
-reportlab~=4.2.0 # pip install reportlab
-num2words~=0.5.13 # pip install num2words
-tkinter~= None #Pip install tk
+pandas~=2.2.2
+mysql-connector-python~=8.4.0
+num2words~=0.5.13
+reportlab~=4.2.0
+ttkbootstrap
+tkcalendar~=1.6.1

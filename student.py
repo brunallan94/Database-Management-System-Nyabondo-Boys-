@@ -8,18 +8,19 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 import os
+import sys
 import num2words
 import datetime
 
 
-def add_student(name, admission_no, stream, grade, amount_expected, amount_paid, balance, term, year, show_messagebox=True):
+def add_student(name, admission_no, stream, grade, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code, term, year, show_messagebox=True):
     conn = create_connection()
     cursor = conn.cursor()
     table_name = f'year_{year}_term_{term}' # Construct the table name based on term and year
     try:
         cursor.execute(
-            f"INSERT INTO {table_name} (name, admission_no, stream, grade, amount_expected, amount_paid, balance) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-            (name, admission_no, stream, grade, amount_expected, amount_paid, balance))
+            f"INSERT INTO {table_name} (name, admission_no, stream, grade, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (name, admission_no, stream, grade, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code))
         conn.commit()
         if show_messagebox:
             messagebox.showinfo("Success", "Student added successfully")
@@ -36,7 +37,7 @@ def search_students(name, term, year):
     table_name = f'year_{year}_term_{term}' # Construct the table name based on term and year
 
     try:
-        cursor.execute(f"SELECT id, name, admission_no, stream, grade, amount_expected, amount_paid, balance FROM {table_name} WHERE name LIKE %s",
+        cursor.execute(f"SELECT id, name, admission_no, stream, grade, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code FROM {table_name} WHERE name LIKE %s",
             (f"%{name}%",))
         results = cursor.fetchall()
         return results
@@ -47,19 +48,29 @@ def search_students(name, term, year):
         conn.close()
 
 
+def resource_path(relative_path):
+    """ Get the absolute path to the resource, works for dev and for PyInstaller """
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+
 def create_student_pdf(student_id, name, year, term,  logged_in_user):
     conn = create_connection()
     cursor = conn.cursor()
     table_name = f'year_{year}_term_{term}' # Construct the table name based on term and year
 
     try:
-        cursor.execute(f"SELECT name, admission_no, stream, grade, amount_expected, amount_paid, balance FROM {table_name} WHERE id = %s", (student_id,))
+        cursor.execute(f"SELECT name, admission_no, stream, grade, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code FROM {table_name} WHERE id = %s", (student_id,))
         student_data = cursor.fetchone()
         if not student_data:
             messagebox.showerror("Error", "No student found with that ID")
             return
 
-        name, admission_no, stream, grade, amount_expected, amount_paid, balance = student_data
+        name, admission_no, stream, grade, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code = student_data
 
         # Save PDF to a specific directory
         directory = os.path.join(os.path.expanduser('~'), 'Downloads', 'Nyabondo_boys_meals')
@@ -73,15 +84,12 @@ def create_student_pdf(student_id, name, year, term,  logged_in_user):
         def number_to_words(balance):
             return num2words.num2words(balance, to='cardinal')
 
-        image = 'logo.JPG'
+        image_path = resource_path('logo.JPG')
         title = 'Nyabondo Boys Boarding Comprehensive School'
         subTitle01 = 'PO Box 212-Sondu Tel: 0741449228/0741455491'
         subTitle02 = 'Email: nyabondobb@yahoo.com'
         subTitle03 = 'SCHOOL OFFICIAL RECEIPT'
-        receipt_no = 1
-        date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-        admission_date = 2021
-        signed = 'admin'
+        date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         pdf = canvas.Canvas(pdf_path, pagesize=letter)
         pdf.setTitle('Personal student meal information receipt')
@@ -95,7 +103,7 @@ def create_student_pdf(student_id, name, year, term,  logged_in_user):
         pdf.line(50, 100, 550, 100)  # Bottom
 
         # Draw an image
-        pdf.drawInlineImage(image, 60, 700)
+        pdf.drawInlineImage(image_path, 60, 700)
 
         # Title
         pdf.setFont('Courier-Bold', 14)
@@ -119,7 +127,7 @@ def create_student_pdf(student_id, name, year, term,  logged_in_user):
         # SubTitle 4
         pdf.drawString(60, 650, f'Term: {term}  Year: {year}')
         pdf.drawString(250, 650, f'Adm No: {admission_no}')
-        pdf.drawString(400, 650, f'Date: {date}')
+        pdf.drawString(400, 650, f'Date: {date_of_payment}')
 
         # SubTitle 5
         pdf.drawString(60, 630, f'Received From: {name}')
@@ -142,11 +150,7 @@ def create_student_pdf(student_id, name, year, term,  logged_in_user):
         pdf.line(70, 160, 550, 160)  # Bottom 2
 
         # Text
-        pdf.drawString(80, 530, 'Meal: Bread')
-        pdf.drawString(80, 510, 'Amount Expected:')
-        pdf.drawString(460, 510, f'{amount_expected}')
-        pdf.drawString(80, 490, 'Amount Paid:')
-        pdf.drawString(460, 490, f'{amount_paid}')
+        pdf.drawString(80, 530, 'Bread')
 
         # Internal vertical line
         pdf.line(70, 590, 70, 160)  # Left
@@ -156,18 +160,19 @@ def create_student_pdf(student_id, name, year, term,  logged_in_user):
         pdf.drawString(490, 180, f'{balance:,}')  # Amount: 134
 
         # Footer
-        pdf.drawString(80, 145, f'Term {term} Fees balance:')
+        pdf.drawString(80, 145, f'Term {term} balance:')
         pdf.drawString(490, 145, f'{balance}')
-        pdf.drawString(60, 130, 'Mode of Payment:')
-        pdf.drawString(490, 130, f'________')
+        pdf.drawString(60, 130, f'Mode of Payment:    {mode_of_payment}')
+        pdf.drawString(440, 130, f'{transaction_code}')
         pdf.drawString(60, 110, 'Served By:')
         pdf.drawString(300, 110, f'{logged_in_user}')
         pdf.line(350, 110, 490, 110)
+        pdf.setFont('Times-Roman', 9)
+        pdf.drawString(430, 90, f'Print Date: {date}')
 
         pdf.save()
 
-        messagebox.showinfo(
-            "Success", f"PDF created successfully at {pdf_path}")
+        messagebox.showinfo("Success", f"PDF created successfully at {pdf_path}")
     except mysql.connector.Error as err:
         messagebox.showerror("Error", f"Error: {err}")
     finally:
@@ -201,11 +206,11 @@ def create_all_student_pdf(student_id, name, year, term, logged_in_user, selecte
         pdf = SimpleDocTemplate(pdf_path, pagesize=letter)
 
         # PDF Content
-        image_path = 'logo.JPG'
+        image_path = resource_path('logo.JPG')
         title = 'Nyabondo Boys Boarding Comprehensive School'
         subTitle01 = 'PO Box 212-Sondu Tel: 0741449228/0741455491'
         subTitle02 = 'Email: nyabondobb@yahoo.com'
-        subTitle03 = 'SCHOOL OFFICIAL MEAL RECEIPT'
+        subTitle03 = 'SCHOOL OFFICIAL MEAL RECEIPT STUDENT LIST'
         date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 
         # Styles
@@ -228,7 +233,7 @@ def create_all_student_pdf(student_id, name, year, term, logged_in_user, selecte
         elements.append(Paragraph(subTitle01, styleN))
         elements.append(Paragraph(subTitle02, styleN))
         elements.append(Paragraph(subTitle03, styleN))
-        elements.append(Paragraph(f'Date: {date}', styleN))
+        elements.append(Paragraph(f'Date Printed: {date}', styleN))
         elements.append(Spacer(1, 12))
 
         # Table data
@@ -265,14 +270,13 @@ def create_all_student_pdf(student_id, name, year, term, logged_in_user, selecte
         conn.close()
 
 
-def update_student(student_id, name, admission_no, stream, grade, amount_exp, amount_paid, balance, year, term):
+def update_student(student_id, name, admission_no, stream, grade, amount_exp, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code, year, term):
     conn = create_connection()
     cursor = conn.cursor()
     table_name = f'year_{year}_term_{term}' # Construct the table name based on term and year
 
     try:
-        cursor.execute(
-            f"UPDATE {table_name} SET name = %s, admission_no = %s, stream = %s, grade = %s, amount_expected = %s, amount_paid = %s, balance = %s WHERE id = %s", (name, admission_no, stream, grade, amount_exp, amount_paid, balance, student_id))
+        cursor.execute(f"UPDATE {table_name} SET name = %s, admission_no = %s, stream = %s, grade = %s, amount_expected = %s, amount_paid = %s, balance = %s, date_of_payment = %s, mode_of_payment = %s, transaction_code = %s WHERE id = %s", (name, admission_no, stream, grade, amount_exp, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code, student_id))
         conn.commit()
         messagebox.showinfo("Success", "Student updated successfully")
     except mysql.connector.Error as err:
