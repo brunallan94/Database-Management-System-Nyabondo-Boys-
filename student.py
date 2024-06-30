@@ -1,6 +1,7 @@
 import mysql.connector
 from db_connection import create_connection
-from tkinter import messagebox
+from tkinter import messagebox, filedialog, HORIZONTAL
+import ttkbootstrap as ttk
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
@@ -8,19 +9,96 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 import os
+import pandas as pd
 import sys
 import num2words
 import datetime
+import logging
+
+logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-def add_student(name, admission_no, stream, grade, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code, term, year, show_messagebox=True):
+def add_student(name, admission_no, stream, grade, database, show_messagebox=True):
     conn = create_connection()
     cursor = conn.cursor()
-    table_name = f'year_{year}_term_{term}' # Construct the table name based on term and year
     try:
-        cursor.execute(
-            f"INSERT INTO {table_name} (name, admission_no, stream, grade, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-            (name, admission_no, stream, grade, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code))
+        cursor.execute(f'USE {database}')
+        cursor.execute("INSERT INTO students (name, admission_no, stream, grade) VALUES (%s, %s, %s, %s)", (name, admission_no, stream, grade))
+        conn.commit()
+        if show_messagebox:
+            messagebox.showinfo("Success", "Student added successfully")
+    except mysql.connector.Error as err:
+        messagebox.showerror("Error", f"Error: {err}")
+        logging.error(f'Error adding student {err}')
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def show_data(tree, database):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(f'USE {database.get()}')
+        cursor.execute('SELECT * FROM students')
+        records = cursor.fetchall()
+        # Clear existing rows
+        for row in tree.get_children():
+            tree.delete(row)
+        # Insert new rows
+        for record in records:
+            tree.insert('', 'end', values=record)
+
+    except mysql.connector.Error as err:
+        messagebox.showerror('Error', f'Error: {err}')
+        logging.error(f'Error fetching data: {err}')
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def process_file(file_path, dat_var):
+    # Create a top-level window for progress bar
+    progress_window = ttk.Toplevel()
+    progress_window.title('Processing data')
+
+    # Set up the progress bar
+    progress_bar = ttk.Progressbar(progress_window, orient=HORIZONTAL, length=300, mode='determinate')
+    progress_bar.pack(pady=10)
+
+    lb = ttk.Label(progress_window, text='', font='arial 15 bold')
+    lb.pack(padx=80)
+    try:
+        df = pd.read_excel(file_path)
+        # Calculate the step size for each update
+        step_size = 100 / len(df.index)
+        # Assuming columns A, B, and C correspond to student_id, name, admission_no, stream, grade
+        for index, row in df.iterrows():
+            row = row.where(pd.notnull(row), None)
+            add_student(row['Name'], row['Admission Number'], row['Stream'], row['Grade'], dat_var.get(), show_messagebox=False)
+
+            # Update the progress bar
+            progress_bar['value'] += step_size
+            lb.config(text=f'{int(progress_bar["value"])}%')
+            progress_window.update_idletasks()
+
+        messagebox.showinfo("Success", "File processed and students added successfully")
+
+        # Close the progress window after completion
+        progress_window.destroy()
+
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to process file: {e}")
+        logging.error(f'Error processing file: {e}')
+
+
+def add_student_details(student_id, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code, dat_var, show_messagebox=True):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(f'USE {dat_var}')
+        cursor.execute("INSERT INTO students (student_id, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code) VALUES (%s, %s, %s, %s, %s, %s)", (student_id, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code))
         conn.commit()
         if show_messagebox:
             messagebox.showinfo("Success", "Student added successfully")
@@ -30,15 +108,13 @@ def add_student(name, admission_no, stream, grade, amount_expected, amount_paid,
         cursor.close()
         conn.close()
 
-
-def search_students(name, term, year):
+def search_students(name, terms_var):
     conn = create_connection()
     cursor = conn.cursor()
-    table_name = f'year_{year}_term_{term}' # Construct the table name based on term and year
+    table_name = terms_var # Construct the table name based on term
 
     try:
-        cursor.execute(f"SELECT id, name, admission_no, stream, grade, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code FROM {table_name} WHERE name LIKE %s",
-            (f"%{name}%",))
+        cursor.execute(f"SELECT id, name, admission_no, stream, grade FROM {table_name} WHERE name LIKE %s", (f"%{name}%",))
         results = cursor.fetchall()
         return results
     except mysql.connector.Error as err:
@@ -58,19 +134,22 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
-def create_student_pdf(student_id, name, year, term,  logged_in_user):
+def create_student_pdf(student_id, term_var, logged_in_user):
     conn = create_connection()
     cursor = conn.cursor()
-    table_name = f'year_{year}_term_{term}' # Construct the table name based on term and year
+    table_name = term_var # Construct the table name based on term and year
 
     try:
-        cursor.execute(f"SELECT name, admission_no, stream, grade, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code FROM {table_name} WHERE id = %s", (student_id,))
+        cursor.execute(f'SELECT name, admission_no, stream, grade FROM students WHERE id = %s', (student_id,))
+        cursor.execute(f"SELECT amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code FROM {table_name} WHERE id = %s", (student_id,))
         student_data = cursor.fetchone()
+        details_data = cursor.fetchone()
         if not student_data:
             messagebox.showerror("Error", "No student found with that ID")
             return
 
-        name, admission_no, stream, grade, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code = student_data
+        name, admission_no, stream, grade = student_data
+        amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code = details_data
 
         # Save PDF to a specific directory
         directory = os.path.join(os.path.expanduser('~'), 'Downloads', 'Nyabondo_boys_meals')
@@ -125,7 +204,7 @@ def create_student_pdf(student_id, name, year, term,  logged_in_user):
         pdf.line(230, 675, 420, 675)
 
         # SubTitle 4
-        pdf.drawString(60, 650, f'Term: {term}  Year: {year}')
+        pdf.drawString(60, 650, f'Term: term  Year: year')
         pdf.drawString(250, 650, f'Adm No: {admission_no}')
         pdf.drawString(400, 650, f'Date: {date_of_payment}')
 
@@ -160,7 +239,7 @@ def create_student_pdf(student_id, name, year, term,  logged_in_user):
         pdf.drawString(490, 180, f'{balance:,}')  # Amount: 134
 
         # Footer
-        pdf.drawString(80, 145, f'Term {term} balance:')
+        pdf.drawString(80, 145, f'Term term balance:')
         pdf.drawString(490, 145, f'{balance}')
         pdf.drawString(60, 130, f'Mode of Payment:    {mode_of_payment}')
         pdf.drawString(440, 130, f'{transaction_code}')
@@ -180,16 +259,16 @@ def create_student_pdf(student_id, name, year, term,  logged_in_user):
         conn.close()
 
 
-def create_all_student_pdf(student_id, name, year, term, logged_in_user, selected_grade):
+def create_all_student_pdf(term, logged_in_user, selected_grade):
     conn = create_connection()
     cursor = conn.cursor()
-    table_name = f'year_{year}_term_{term}' # Construct the table name based on term and year
+    table_name = term  # Construct the table name based on term and year
 
     try:
-        cursor.execute(
-            f"SELECT name, admission_no, stream, grade, amount_expected, amount_paid, balance FROM {table_name} WHERE grade = %s",
-            (selected_grade,))
+        cursor.execute(f'SELECT name, admission_no, stream, grade FROM students WHERE grade = %s', (selected_grade,))
+        cursor.execute(f"SELECT amount_expected, amount_paid, balance FROM {table_name} WHERE grade = %s", (selected_grade,))
         student_data = cursor.fetchall()
+        student_details = cursor.fetchall()
         if not student_data:
             messagebox.showerror("Error", "No student found in the selected grade")
             return
@@ -200,7 +279,7 @@ def create_all_student_pdf(student_id, name, year, term, logged_in_user, selecte
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        pdf_path = os.path.join(directory, f"Grade{selected_grade}_students_meal_information_for_year{year}_term{term}.pdf")
+        pdf_path = os.path.join(directory, f"Grade{selected_grade}_students_meal_information_for_year term{term}.pdf")
 
         # Create PDF document
         pdf = SimpleDocTemplate(pdf_path, pagesize=letter)
@@ -261,8 +340,7 @@ def create_all_student_pdf(student_id, name, year, term, logged_in_user, selecte
         # Build the pdf
         pdf.build(elements)
 
-        messagebox.showinfo(
-            "Success", f"PDF created successfully at {pdf_path}")
+        messagebox.showinfo("Success", f"PDF created successfully at {pdf_path}")
     except mysql.connector.Error as err:
         messagebox.showerror("Error", f"Error: {err}")
     finally:
@@ -270,13 +348,13 @@ def create_all_student_pdf(student_id, name, year, term, logged_in_user, selecte
         conn.close()
 
 
-def update_student(student_id, name, admission_no, stream, grade, amount_exp, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code, year, term):
+def update_student(student_id, name, admission_no, stream, grade, term):
     conn = create_connection()
     cursor = conn.cursor()
-    table_name = f'year_{year}_term_{term}' # Construct the table name based on term and year
+    table_name = term # Construct the table name based on term and year
 
     try:
-        cursor.execute(f"UPDATE {table_name} SET name = %s, admission_no = %s, stream = %s, grade = %s, amount_expected = %s, amount_paid = %s, balance = %s, date_of_payment = %s, mode_of_payment = %s, transaction_code = %s WHERE id = %s", (name, admission_no, stream, grade, amount_exp, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code, student_id))
+        cursor.execute(f"UPDATE {table_name} SET name = %s, admission_no = %s, stream = %s, grade = %s WHERE id = %s", (name, admission_no, stream, grade, student_id))
         conn.commit()
         messagebox.showinfo("Success", "Student updated successfully")
     except mysql.connector.Error as err:

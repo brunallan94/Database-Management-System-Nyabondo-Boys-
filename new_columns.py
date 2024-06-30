@@ -27,5 +27,3 @@ def payment_columns():
     finally:
         cursor.close()
         conn.close()
-
-payment_columns()
