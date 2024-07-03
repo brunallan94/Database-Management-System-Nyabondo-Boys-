@@ -1,16 +1,15 @@
 from tkinter import messagebox
-from typing import Tuple, Any
 from db_connection import create_connection
 import mysql.connector
 import ttkbootstrap as ttk
 import logging
-from ttkbootstrap.constants import *
 
 # Configure logging
 logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-def authenticate(username, password) -> tuple[bool, Any]:
+def authenticate(username, password) -> tuple[bool, any]:
+    global cursor, conn
     conn = create_connection()
     cursor = conn.cursor()
     try:
@@ -30,9 +29,24 @@ def authenticate(username, password) -> tuple[bool, Any]:
         conn.close()
 
 
+def login_command(open_main_application):
+    username = username_entry.get()
+    password = password_entry.get()
+    success, logged_in_user = authenticate(username, password)
+    if success:
+        app.destroy() # Close the login window
+        ttk.Style.instance = None
+        open_main_application(logged_in_user)
+    else:
+        messagebox.showerror("Error", "Invalid username or password")
+        logging.warning(f'Login failed for user: {username}')
+
+
 def create_login_window(open_main_application) -> None:
-    root = ttk.Window(themename='darkly', title='Login', size=(600, 400))
-    frame = ttk.Frame(root)
+    global app, username_entry, password_entry
+
+    app = ttk.Window(themename='darkly', title='Login', size=(500, 350), position=(450, 250), resizable=(False, False))
+    frame = ttk.Frame(app)
     frame.pack(padx=10, pady=10)
 
     text_label = ttk.Label(frame, text="LOGIN", font=('GothicE', 38))
@@ -49,21 +63,12 @@ def create_login_window(open_main_application) -> None:
     password_entry = ttk.Entry(frame, show="*", font=('Times-Roman', f_size), bootstyle='SUCCESS')
     password_entry.grid(row=2, column=1, pady=10, sticky='ns')
 
-    def login_command():
-        username = username_entry.get()
-        password = password_entry.get()
-        success, logged_in_user = authenticate(username, password)
-        if success:
-            root.destroy()  # Close the login window
-            open_main_application(logged_in_user)
-        else:
-            messagebox.showerror("Error", "Invalid username or password")
-            logging.warning(f'Login failed for user: {username}')
-
-    login_button = ttk.Button(frame, text="Login", command=login_command, bootstyle=('SUCCESS', 'OUTLINE'))
+    login_button = ttk.Button(frame, text="Login", command=lambda: login_command(open_main_application), bootstyle=('SUCCESS', 'OUTLINE'))
     login_button.grid(row=4, column=1, columnspan=3, sticky='e', ipadx=5, ipady=10, padx=40)
 
-    quit_button = ttk.Button(frame, text='Quit', command=root.destroy, bootstyle=('DANGER', 'OUTLINE'))
+    quit_button = ttk.Button(frame, text='Quit', command=app.destroy, bootstyle=('DANGER', 'OUTLINE'))
     quit_button.grid(row=4, column=3, columnspan=3, sticky='e', ipadx=5, ipady=10, padx=40)
 
-    root.mainloop()
+    app.mainloop()
+
+

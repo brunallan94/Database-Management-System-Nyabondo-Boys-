@@ -1,0 +1,46 @@
+2024-07-01 16:05:52,320 - ERROR - Error adding student 1366 (HY000): Incorrect integer value: '' for column 'admission_no' at row 1
+2024-07-01 16:15:18,885 - ERROR - Error adding student 1366 (HY000): Incorrect integer value: '' for column 'admission_no' at row 1
+2024-07-01 16:25:09,996 - ERROR - Error adding student 1366 (HY000): Incorrect integer value: '' for column 'admission_no' at row 1
+2024-07-01 16:48:31,792 - ERROR - Error adding student 1366 (HY000): Incorrect integer value: '' for column 'admission_no' at row 1
+2024-07-01 17:08:55,587 - ERROR - Error adding student 1366 (HY000): Incorrect integer value: '' for column 'admission_no' at row 1
+2024-07-02 01:48:08,396 - ERROR - Error adding student 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-02 03:53:21,503 - ERROR - Error adding student 1054 (42S22): Unknown column 'mode_of_payment' in 'field list'
+2024-07-02 03:53:33,031 - ERROR - Error adding student 1054 (42S22): Unknown column 'mode_of_payment' in 'field list'
+2024-07-02 03:58:40,009 - ERROR - Err 1049 (42000): Unknown database 'py_var1'
+2024-07-02 04:05:43,494 - ERROR - Err 1049 (42000): Unknown database 'py_var1'
+2024-07-02 13:48:58,571 - ERROR - Err 1049 (42000): Unknown database 'py_var1'
+2024-07-02 15:09:23,948 - ERROR - Err 1049 (42000): Unknown database 'py_var1'
+2024-07-02 15:28:47,972 - ERROR - Err 1049 (42000): Unknown database 'py_var1'
+2024-07-02 15:29:38,053 - ERROR - Err 1049 (42000): Unknown database 'py_var1'
+2024-07-02 22:02:33,906 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-02 22:02:52,035 - ERROR - Err 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 13:51:07,667 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 13:51:25,645 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 15:12:31,903 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 15:12:42,824 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 15:13:01,344 - ERROR - Err 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 18:36:36,381 - ERROR - Err 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 18:41:39,839 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 18:41:53,598 - ERROR - Err 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 18:42:54,255 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 18:43:05,871 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 19:04:03,154 - WARNING - Login failed for user: 
+2024-07-03 19:28:09,816 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 19:28:16,062 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 19:29:27,427 - ERROR - Err 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 19:29:40,604 - ERROR - Err 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 19:34:34,770 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 19:34:49,158 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 19:37:51,948 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 19:38:15,248 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 19:41:12,616 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 19:41:12,618 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 19:41:30,786 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 19:41:34,918 - WARNING - Login failed for user: admin
+2024-07-03 20:04:56,569 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 20:06:22,233 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 20:06:31,352 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 20:10:20,650 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 20:10:24,459 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 20:11:45,684 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-03 20:11:52,641 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1

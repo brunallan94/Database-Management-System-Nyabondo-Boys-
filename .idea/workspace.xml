@@ -5,8 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b654b578-b0a6-4b9e-a3e1-b68ca5f9d405" name="Changes" comment="seventh commit">
+      <change afterPath="$PROJECT_DIR$/new_features.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.log" beforeDir="false" afterPath="$PROJECT_DIR$/app.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/download_window_test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/login.py" beforeDir="false" afterPath="$PROJECT_DIR$/login.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main_application.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_application.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_page_test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/new_columns.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/search_window_test.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/student.py" beforeDir="false" afterPath="$PROJECT_DIR$/student.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/ui.py" afterDir="false" />
     </list>
@@ -30,18 +37,18 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "brunallan94"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;brunallan94&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/brunallan94/Database-Management-System-Nyabondo-Boys-.git",
-    "accountId": "fb63deb1-0325-4205-92bd-01b356f84d51"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/brunallan94/Database-Management-System-Nyabondo-Boys-.git&quot;,
+    &quot;accountId&quot;: &quot;fb63deb1-0325-4205-92bd-01b356f84d51&quot;
   }
-}]]></component>
+}</component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -65,16 +72,23 @@
     "Python.main_page_test.executor": "Run",
     "Python.new_columns.executor": "Run",
     "Python.new_database.executor": "Run",
+    "Python.new_features.executor": "Run",
     "Python.pdf_test.executor": "Run",
     "Python.progress_bar_test.executor": "Run",
     "Python.search_window_test.executor": "Run",
+    "Python.student.executor": "Run",
     "Python.ui.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "trial",
     "last_opened_file_path": "C:/Users/BRUN ALLAN/Documents/Python Projects/Database Management System (Nyabondo Boys)"
   }
 }]]></component>
-  <component name="RunManager" selected="Python.main_application">
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\BRUN ALLAN\Documents\Python Projects\Database Management System (Nyabondo Boys)\venv\tests" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.main">
     <configuration name="download_window_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Database Management System (Nyabondo Boys)" />
       <option name="ENV_FILES" value="" />
@@ -88,7 +102,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/download_window_test.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\BRUN ALLAN\Documents\Python Projects\Database Management System (Nyabondo Boys)\venv\tests\download_window_test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -155,7 +169,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main_page_test.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\BRUN ALLAN\Documents\Python Projects\Database Management System (Nyabondo Boys)\venv\tests\main_page_test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -177,7 +191,29 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/search_window_test.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\BRUN ALLAN\Documents\Python Projects\Database Management System (Nyabondo Boys)\venv\tests\search_window_test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="student" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Database Management System (Nyabondo Boys)" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/student.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -189,6 +225,7 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.main_application" />
+        <item itemvalue="Python.student" />
         <item itemvalue="Python.search_window_test" />
         <item itemvalue="Python.main_page_test" />
         <item itemvalue="Python.download_window_test" />
@@ -226,6 +263,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="new_ui" />
     <MESSAGE value="seventh commit" />
     <option name="LAST_COMMIT_MESSAGE" value="seventh commit" />
   </component>

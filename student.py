@@ -1,6 +1,7 @@
+from datetime import date, datetime, timedelta, time
 import mysql.connector
 from db_connection import create_connection
-from tkinter import messagebox, filedialog, HORIZONTAL
+from tkinter import filedialog, HORIZONTAL # messagebox
 import ttkbootstrap as ttk
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
@@ -14,11 +15,16 @@ import sys
 import num2words
 import datetime
 import logging
+from ttkbootstrap.dialogs.dialogs import Messagebox
 
 logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-def add_student(name, admission_no, stream, grade, database, show_messagebox=True):
+def still_in_development():
+    Messagebox.show_info('Development', 'We are still working on this feature')
+
+
+def add_student(name, admission_no, stream, grade, database, show_messagebox=True) -> None:
     conn = create_connection()
     cursor = conn.cursor()
     try:
@@ -26,21 +32,62 @@ def add_student(name, admission_no, stream, grade, database, show_messagebox=Tru
         cursor.execute("INSERT INTO students (name, admission_no, stream, grade) VALUES (%s, %s, %s, %s)", (name, admission_no, stream, grade))
         conn.commit()
         if show_messagebox:
-            messagebox.showinfo("Success", "Student added successfully")
+            Messagebox.show_info("Success", "Student added successfully")
     except mysql.connector.Error as err:
-        messagebox.showerror("Error", f"Error: {err}")
+        Messagebox.show_error("Error", f"Error: {err}")
         logging.error(f'Error adding student {err}')
     finally:
         cursor.close()
         conn.close()
 
 
-def show_data(tree, database):
+def show_data_main(tree, database, info_label) -> None:
     conn = create_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(f'USE {database.get()}')
         cursor.execute('SELECT * FROM students')
+        records = cursor.fetchall()
+
+        # Clear existing rows
+        for row in tree.get_children():
+            tree.delete(row)
+
+        # Insert new rows
+        for record in records:
+            tree.insert('', 'end', values=record)
+
+        # update the info_label with the number of students and greeting
+        num_students = len(records)
+        info_label.config(text=f'Number of students: {num_students}')
+
+    except mysql.connector.Error as err:
+        Messagebox.show_error('Error', f'Error: {err}')
+        logging.error(f'Error fetching data: {err}')
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_greeting(logged_in_user):
+    current_hour = datetime.datetime.now().hour
+    if current_hour < 12:
+        return f'Good Morning,  {logged_in_user}'
+    elif 12 <= current_hour < 18:
+        return f'Good Afternoon, {logged_in_user}'
+
+    else:
+        return f'Good Evening, {logged_in_user}'
+
+
+def show_data_search(search_entry, tree, database) -> None:
+    conn = create_connection()
+    cursor = conn.cursor()
+    query = search_entry.get()
+    try:
+        cursor.execute(f'USE {database.get()}')
+        cursor.execute(f"SELECT * FROM students WHERE name LIKE '%{query}%'")
         records = cursor.fetchall()
         # Clear existing rows
         for row in tree.get_children():
@@ -50,7 +97,7 @@ def show_data(tree, database):
             tree.insert('', 'end', values=record)
 
     except mysql.connector.Error as err:
-        messagebox.showerror('Error', f'Error: {err}')
+        Messagebox.show_error('Error', f'Error: {err}')
         logging.error(f'Error fetching data: {err}')
 
     finally:
@@ -64,7 +111,7 @@ def process_file(file_path, dat_var):
     progress_window.title('Processing data')
 
     # Set up the progress bar
-    progress_bar = ttk.Progressbar(progress_window, orient=HORIZONTAL, length=300, mode='determinate')
+    progress_bar = ttk.Progressbar(progress_window, orient=HORIZONTAL, length=300, mode='determinate', bootstyle=('SUCCESS', 'STRIPED'))
     progress_bar.pack(pady=10)
 
     lb = ttk.Label(progress_window, text='', font='arial 15 bold')
@@ -83,42 +130,131 @@ def process_file(file_path, dat_var):
             lb.config(text=f'{int(progress_bar["value"])}%')
             progress_window.update_idletasks()
 
-        messagebox.showinfo("Success", "File processed and students added successfully")
+        Messagebox.show_info("Success", "File processed and students added successfully")
 
         # Close the progress window after completion
         progress_window.destroy()
 
     except Exception as e:
-        messagebox.showerror("Error", f"Failed to process file: {e}")
+        Messagebox.show_error("Error", f"Failed to process file: {e}")
         logging.error(f'Error processing file: {e}')
 
 
-def add_student_details(student_id, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code, dat_var, show_messagebox=True):
+def add_student_details(student_id, amount_expected, amount_paid, balance, date_of_payment, method_of_payment, transaction_code, dat_var, term, show_messagebox=True):
     conn = create_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(f'USE {dat_var}')
-        cursor.execute("INSERT INTO students (student_id, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code) VALUES (%s, %s, %s, %s, %s, %s)", (student_id, amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code))
+        cursor.execute(f"INSERT INTO {term} (student_id, amount_expected, amount_paid, balance, date_of_payment, method_of_payment, transaction_code) VALUES (%s, %s, %s, %s, %s, %s, %s)", (student_id, amount_expected, amount_paid, balance, date_of_payment, method_of_payment, transaction_code))
         conn.commit()
         if show_messagebox:
-            messagebox.showinfo("Success", "Student added successfully")
+            Messagebox.show_info("Success", "Student added successfully")
     except mysql.connector.Error as err:
-        messagebox.showerror("Error", f"Error: {err}")
+        Messagebox.show_error("Error", f"Error: {err}")
+        logging.error(f'Error adding student {err}')
     finally:
         cursor.close()
         conn.close()
 
-def search_students(name, terms_var):
+
+def update_student(student_id, name, admission_no, stream, grade, database):
     conn = create_connection()
     cursor = conn.cursor()
-    table_name = terms_var # Construct the table name based on term
+    try:
+        cursor.execute(f'USE {database}')
+        cursor.execute(f"UPDATE students SET name = %s, admission_no = %s, stream = %s, grade = %s WHERE id = %s", (name, admission_no, stream, grade, student_id))
+        conn.commit()
+    except mysql.connector.Error as err:
+        Messagebox.show_error("Error", f"Error: {err}")
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def update_student_download(first_id, student_id, amount_expected, amount_paid, balance, dop, method_of_payment, transaction, database, term):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(f'USE {database}')
+        cursor.execute(f"UPDATE {term} SET student_id = %s, amount_expected = %s, amount_paid = %s, balance = %s, date_of_payment = %s, method_of_payment = %s, transaction_code = %s WHERE id = %s", (student_id, amount_expected, amount_paid, balance, dop, method_of_payment, transaction, first_id))
+        conn.commit()
+    except mysql.connector.Error as err:
+        Messagebox.show_error("Error", f"Error: {err}")
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def delete_student(student_id, database):
+    conn = create_connection()
+    cursor = conn.cursor()
+    res = Messagebox.show_question('Confirmation', 'Are you sure you would like to delete this students info?', alert=True, buttons=['No:secondary', 'Yes:primary'])
+
+    if res =='yes':
+        try:
+            cursor.execute(f'USE {database}')
+            query = 'DELETE FROM students WHERE id = %s'
+            cursor.execute(query, (student_id,))
+            conn.commit()
+        except mysql.connector.Error as err:
+            Messagebox.show_error('Error', f'Error: {err}')
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    else:
+        return None
+
+
+def show_data_download(student_id, database, term, tree, searched_name):
+    conn = create_connection()
+    cursor = conn.cursor()
 
     try:
-        cursor.execute(f"SELECT id, name, admission_no, stream, grade FROM {table_name} WHERE name LIKE %s", (f"%{name}%",))
+        cursor.execute(f'USE {database}')
+
+        # Fetch and display the student's name
+        cursor.execute(f'SELECT name FROM students WHERE id = %s', (student_id,))
+        student_name = cursor.fetchone()
+        if student_name:
+            searched_name.config(text=f'{student_name[0]}')
+        else:
+            searched_name.config(text='Name not found')
+
+        # Clear existing rows in the tree
+        for row in tree.get_children():
+            tree.delete(row)
+
+        # Fetch and display the payment details
+        cursor.execute(f"SELECT * FROM {term} WHERE student_id = {student_id}")
         results = cursor.fetchall()
-        return results
+
+        # Insert new rows
+        for result in results:
+            tree.insert('', 'end', values=result)
+
     except mysql.connector.Error as err:
-        messagebox.showerror("Error", f"Error: {err}")
+        Messagebox.show_error("Error", f"Error: {err}")
+        logging.error(f'Err {err}')
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def delete_student_download(student_id, database):
+    conn = create_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(f'USE {database}')
+        query = 'DELETE FROM students WHERE id = %s'
+        cursor.execute(query, (student_id,))
+        conn.commit()
+
+    except mysql.connector.Error as err:
+        Messagebox.show_error('Error', f'Error: {err}')
+
     finally:
         cursor.close()
         conn.close()
@@ -134,18 +270,22 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
-def create_student_pdf(student_id, term_var, logged_in_user):
+def create_student_pdf(id, student_id, database, term_var, logged_in_user):
     conn = create_connection()
     cursor = conn.cursor()
-    table_name = term_var # Construct the table name based on term and year
 
     try:
+        cursor.execute(f'USE {database}')
         cursor.execute(f'SELECT name, admission_no, stream, grade FROM students WHERE id = %s', (student_id,))
-        cursor.execute(f"SELECT amount_expected, amount_paid, balance, date_of_payment, mode_of_payment, transaction_code FROM {table_name} WHERE id = %s", (student_id,))
         student_data = cursor.fetchone()
-        details_data = cursor.fetchone()
         if not student_data:
-            messagebox.showerror("Error", "No student found with that ID")
+            Messagebox.show_error("Error", "No student found with that ID")
+            return
+
+        cursor.execute(f'SELECT amount_expected, amount_paid, balance, date_of_payment, method_of_payment, transaction_code FROM {term_var} WHERE id = %s ORDER BY date_of_payment DESC LIMIT 1', (id,))
+        details_data = cursor.fetchone()
+        if not details_data:
+            Messagebox.show_error('Error', 'No payment details found for that student')
             return
 
         name, admission_no, stream, grade = student_data
@@ -204,7 +344,7 @@ def create_student_pdf(student_id, term_var, logged_in_user):
         pdf.line(230, 675, 420, 675)
 
         # SubTitle 4
-        pdf.drawString(60, 650, f'Term: term  Year: year')
+        pdf.drawString(60, 650, f'Term: {term_var[-1]}  Year: {database[-4:]}')
         pdf.drawString(250, 650, f'Adm No: {admission_no}')
         pdf.drawString(400, 650, f'Date: {date_of_payment}')
 
@@ -239,7 +379,7 @@ def create_student_pdf(student_id, term_var, logged_in_user):
         pdf.drawString(490, 180, f'{balance:,}')  # Amount: 134
 
         # Footer
-        pdf.drawString(80, 145, f'Term term balance:')
+        pdf.drawString(80, 145, f'Term {term_var[-1]} balance:')
         pdf.drawString(490, 145, f'{balance}')
         pdf.drawString(60, 130, f'Mode of Payment:    {mode_of_payment}')
         pdf.drawString(440, 130, f'{transaction_code}')
@@ -250,28 +390,39 @@ def create_student_pdf(student_id, term_var, logged_in_user):
         pdf.drawString(430, 90, f'Print Date: {date}')
 
         pdf.save()
-
-        messagebox.showinfo("Success", f"PDF created successfully at {pdf_path}")
+        Messagebox.show_info("Success", f"PDF created successfully at {pdf_path}")
     except mysql.connector.Error as err:
-        messagebox.showerror("Error", f"Error: {err}")
+        Messagebox.show_error("Error", f"Error: {err}")
     finally:
         cursor.close()
         conn.close()
 
 
-def create_all_student_pdf(term, logged_in_user, selected_grade):
+def create_all_student_pdf(term, database, logged_in_user, selected_grade):
     conn = create_connection()
     cursor = conn.cursor()
-    table_name = term  # Construct the table name based on term and year
 
     try:
-        cursor.execute(f'SELECT name, admission_no, stream, grade FROM students WHERE grade = %s', (selected_grade,))
-        cursor.execute(f"SELECT amount_expected, amount_paid, balance FROM {table_name} WHERE grade = %s", (selected_grade,))
+        cursor.execute(f'USE {database}')
+        cursor.execute(f'SELECT id, name, admission_no, stream, grade FROM students WHERE grade = %s', (selected_grade,))
         student_data = cursor.fetchall()
-        student_details = cursor.fetchall()
         if not student_data:
-            messagebox.showerror("Error", "No student found in the selected grade")
+            Messagebox.show_error("Error", "No student found in the selected grade")
             return
+
+        # Prepare a list to hold combined student and payment data
+        combined_data = []
+
+        # Fetch payment details for each student from the term-specific table
+        for student in student_data:
+            student_id, name, admission_no, stream, grade = student
+            cursor.execute(f'USE {database}')
+            cursor.execute(f"SELECT amount_expected, amount_paid, balance FROM {term} WHERE student_id = %s ORDER BY date_of_payment DESC LIMIT 1", (student_id,))
+            payment_data = cursor.fetchone()
+
+            if payment_data:
+                amount_expected, amount_paid, balance = payment_data
+                combined_data.append((name, admission_no, stream, grade, amount_expected, amount_paid, balance))
 
         # Save PDF to a specific directory
         directory = os.path.join(os.path.expanduser('~'), 'Downloads', 'Nyabondo_boys_meals')
@@ -317,7 +468,7 @@ def create_all_student_pdf(term, logged_in_user, selected_grade):
 
         # Table data
         data = [['No', 'Name', 'Admission No', 'Stream', 'Grade', 'Amount Expected', 'Amount Paid', 'Balance']]
-        for idx, student in enumerate(student_data, start=1):
+        for idx, student in enumerate(combined_data, start=1):
             data.append([idx] + list(student))
 
         # Create a Table
@@ -340,25 +491,11 @@ def create_all_student_pdf(term, logged_in_user, selected_grade):
         # Build the pdf
         pdf.build(elements)
 
-        messagebox.showinfo("Success", f"PDF created successfully at {pdf_path}")
+        Messagebox.show_info("Success", f"PDF created successfully at {pdf_path}")
     except mysql.connector.Error as err:
-        messagebox.showerror("Error", f"Error: {err}")
+        Messagebox.show_error("Error", f"Error: {err}")
     finally:
         cursor.close()
         conn.close()
 
 
-def update_student(student_id, name, admission_no, stream, grade, term):
-    conn = create_connection()
-    cursor = conn.cursor()
-    table_name = term # Construct the table name based on term and year
-
-    try:
-        cursor.execute(f"UPDATE {table_name} SET name = %s, admission_no = %s, stream = %s, grade = %s WHERE id = %s", (name, admission_no, stream, grade, student_id))
-        conn.commit()
-        messagebox.showinfo("Success", "Student updated successfully")
-    except mysql.connector.Error as err:
-        messagebox.showerror("Error", f"Error: {err}")
-    finally:
-        cursor.close()
-        conn.close()
