@@ -2,11 +2,7 @@ from ui import create_main_page_ui, create_search_student_ui, create_download_ui
 import ttkbootstrap as ttk
 
 
-def open_main_application(logged_in_user=None):
-    # Recreate the ttkbootstrap style instance
-    # style = ttk.Style()
-    # style.theme_use('cyborg')
-
+def open_main_application(logged_in_user=None) -> None:
     root = ttk.Window(themename='cyborg', title='Nyabondo Boys Student Meal Management System')
 
     tab_control = ttk.Notebook(root)
