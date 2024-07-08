@@ -5,18 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b654b578-b0a6-4b9e-a3e1-b68ca5f9d405" name="Changes" comment="seventh commit">
-      <change afterPath="$PROJECT_DIR$/Mysql Database/build/new_database/Analysis-00.toc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Mysql Database/build/new_database/EXE-00.toc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Mysql Database/build/new_database/PKG-00.toc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Mysql Database/build/new_database/PYZ-00.pyz" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Mysql Database/build/new_database/PYZ-00.toc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Mysql Database/build/new_database/base_library.zip" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Mysql Database/build/new_database/new_database.pkg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Mysql Database/build/new_database/warn-new_database.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Mysql Database/build/new_database/xref-new_database.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Mysql Database/dist/new_database.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Mysql Database/new_database.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Mysql Database/new_database.spec" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/build/main/Analysis-00.toc" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/build/main/COLLECT-00.toc" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/build/main/EXE-00.toc" afterDir="false" />
@@ -1669,13 +1657,7 @@
       <change afterPath="$PROJECT_DIR$/dist/main/main.exe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.log" beforeDir="false" afterPath="$PROJECT_DIR$/app.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/login.py" beforeDir="false" afterPath="$PROJECT_DIR$/login.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main_application.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_application.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/new_database.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/new_features.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/student.py" beforeDir="false" afterPath="$PROJECT_DIR$/student.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/ui.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -1740,7 +1722,7 @@
     &quot;Python.ui.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;trial&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/BRUN ALLAN/Documents/Python Projects/Database Management System (Nyabondo Boys)&quot;
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/BRUN ALLAN/Documents/Python Projects/Stock Notification Update&quot;
   }
 }</component>
   <component name="RecentsManager">
@@ -1748,7 +1730,7 @@
       <recent name="C:\Users\BRUN ALLAN\Documents\Python Projects\Database Management System (Nyabondo Boys)\venv\tests" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.main_application">
     <configuration name="download_window_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Database Management System (Nyabondo Boys)" />
       <option name="ENV_FILES" value="" />

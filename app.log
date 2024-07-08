@@ -45,3 +45,5 @@
 2024-07-03 20:11:45,684 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
 2024-07-03 20:11:52,641 - ERROR - Error fetching data: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
 2024-07-04 10:44:35,242 - WARNING - Login failed for user: admin
+2024-07-04 21:30:17,863 - ERROR - Err 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+2024-07-04 21:35:50,704 - ERROR - Err 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1

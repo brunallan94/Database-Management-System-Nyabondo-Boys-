@@ -309,8 +309,8 @@ def create_student_pdf(id, student_id, database, term_var, logged_in_user) -> No
         pdf_path = os.path.join(directory, f"{name}_meal_information.pdf")
 
         # Create pdf
-        def number_to_words(balance) -> str:
-            return num2words.num2words(balance, to='cardinal')
+        def number_to_words(amount_p) -> str:
+            return num2words.num2words(amount_p, to='cardinal')
 
         image_path = resource_path('logo.JPG')
         title: str = 'Nyabondo Boys Boarding Comprehensive School'
@@ -323,15 +323,15 @@ def create_student_pdf(id, student_id, database, term_var, logged_in_user) -> No
         pdf.setTitle('Personal student meal information receipt')
 
         # Vertical boundary line
-        pdf.line(50, 800, 50, 100)  # Left
-        pdf.line(550, 800, 550, 100)  # Right
+        pdf.line(50, 785, 50, 100)  # Left
+        pdf.line(550, 785, 550, 100)  # Right
 
         # Horizontal boundary line
-        pdf.line(50, 800, 550, 800)  # Top
+        pdf.line(50, 785, 550, 785)  # Top
         pdf.line(50, 100, 550, 100)  # Bottom
 
         # Draw an image
-        pdf.drawInlineImage(image_path, 60, 700)
+        pdf.drawInlineImage(image_path, 60, 685)
 
         # Title
         pdf.setFont('Courier-Bold', 14)
@@ -363,7 +363,7 @@ def create_student_pdf(id, student_id, database, term_var, logged_in_user) -> No
         pdf.line(50, 625, 550, 625)
 
         # SubTitle 6
-        pdf.drawString(60, 600, f'Sum of Kshs: {number_to_words(balance)}')
+        pdf.drawString(60, 600, f'Sum of Kshs: {number_to_words(amount_paid)} Shillings Only.')
 
         # Heading
         pdf.setFillColorRGB(r=0, g=0, b=0)
@@ -379,21 +379,22 @@ def create_student_pdf(id, student_id, database, term_var, logged_in_user) -> No
 
         # Text
         pdf.drawString(80, 530, 'Bread')
+        #pdf.drawString(80, 510, 'Paid')
+        pdf.drawString(490, 510, f'{amount_paid}')
 
         # Internal vertical line
         pdf.line(70, 590, 70, 160)  # Left
 
         # Text
         pdf.drawString(80, 180, 'Total:')  # Total
-        pdf.drawString(490, 180, f'{balance:,}')  # Amount: 134
+        pdf.drawString(490, 180, f'{amount_paid:,}')  # Amount: 134
 
         # Footer
         pdf.drawString(80, 145, f'Term {term_var[-1]} balance:')
         pdf.drawString(490, 145, f'{balance}')
-        pdf.drawString(60, 130, f'Mode of Payment:    {mode_of_payment}')
+        pdf.drawString(60, 130, f'Mode of Payment: {mode_of_payment}')
         pdf.drawString(440, 130, f'{transaction_code}')
-        pdf.drawString(60, 110, 'Served By:')
-        pdf.drawString(300, 110, f'{logged_in_user}')
+        pdf.drawString(60, 110, f'Served By: {logged_in_user}')
         pdf.line(350, 110, 490, 110)
         pdf.setFont('Times-Roman', 9)
         pdf.drawString(430, 90, f'Print Date: {date}')
